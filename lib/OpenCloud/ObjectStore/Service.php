@@ -49,7 +49,8 @@ class Service extends ObjectStoreBase
         OpenStack $connection,
         $serviceName = RAXSDK_OBJSTORE_NAME,
         $serviceRegion = RAXSDK_OBJSTORE_REGION,
-        $urltype = RAXSDK_OBJSTORE_URLTYPE
+        $urltype = RAXSDK_OBJSTORE_URLTYPE,
+        $cdnUrltype = NULL
     ) {
         $this->debug(Lang::translate('initializing ObjectStore...'));
 
@@ -61,6 +62,11 @@ class Service extends ObjectStoreBase
             $serviceRegion,
             $urltype
         );
+
+        // If no URL type is passed for CDN operations, then assume
+        // it's the same as the main URL type.
+        if (is_null($cdnUrltype) )
+            $cdnUrltype = $urltype;
 
         // establish the CDN container, if available
         try {
