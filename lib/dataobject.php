@@ -44,7 +44,6 @@ class DataObject extends ObjStoreBase {
          * properties
          */
         $header_translate = array(
-        	'Etag' => 'hash',
         	'Last-Modified' => 'last_modified'
         );
 
@@ -146,15 +145,20 @@ class DataObject extends ObjStoreBase {
 
 		// set the headers
 		$headers = $this->MetadataHeaders();
-		if (isset($this->etag))
-		    $headers['ETag'] = $this->etag;
 		$headers['Content-Type'] = $this->content_type;
 		$headers['Content-Length'] = $this->content_length;
 
-		// copy any extra headers
-		if (!empty($this->extra_headers) ) {
-			foreach ($this->extra_headers as $header=>$value) {
-				$headers[$header] = $value;
+		// If content is to be uploaded (as opposed to an object manifest,
+		// for example), then headers and etag should be included now.
+		if($this->content_length > 0) {
+			if (isset($this->etag))
+				$headers['ETag'] = $this->etag;
+
+			// copy any extra headers
+			if (!empty($this->extra_headers) ) {
+				foreach ($this->extra_headers as $header=>$value) {
+					$headers[$header] = $value;
+				}
 			}
 		}
 
@@ -178,16 +182,51 @@ class DataObject extends ObjStoreBase {
 			return FALSE;
 		}
 
-		// set values from response
-		foreach($response->Headers() as $key => $value) {
-			if (isset($this->header_translate[$key])) {
-				$this->{$this->header_translate[$key]} = $value;
-			}
-		}
-
 		// close the file handle
 		if ($fp)
 			fclose($fp);
+
+		// If no content was uploaded (eg. if a zero-size object manifest
+		// was being created), then the extra headers and content-type
+		// need to be set separately using a POST update.
+		//
+		// Setting the ETag for a manifest seems to be
+		// problematic. Documentation states that the ETag for a manifest
+		// should be the MD5 of the concatenated ETags of the included
+		// files. However, the API should set this anyway.
+		if($this->content_length == 0) {
+			$headers = array('Content-Type'=>$this->content_type);
+
+			// copy any extra headers
+			if (!empty($this->extra_headers) ) {
+				foreach ($this->extra_headers as $header=>$value) {
+					$headers[$header] = $value;
+				}
+			}
+
+			$response = $this->Service()->Request(
+				$this->Url(),
+				'POST',
+				$headers,
+				'');
+
+			if (($stat=$response->HttpStatus()) >= 300) {
+				throw new CreateUpdateError(
+				sprintf(
+					_('Problem saving/updating object content type [%s] HTTP status [%s] '.
+						'response [%s]'),
+					$this->Url(),
+					$stat,
+					$response->HttpBody()));
+				return FALSE;
+			}
+		}
+
+        // parse the response headers and populate this object
+        $this->GetHeaders($response);
+
+        // parse the metadata
+        $this->GetMetadata($response);
 
 		return $response;
 	} // create()
@@ -395,11 +434,26 @@ class DataObject extends ObjStoreBase {
      * Accessor method for reading Object's private ETag attribute.
      *
      * @api
-     * @return string MD5 checksum hexidecimal string
+     * @return string MD5 checksum hexadecimal string
      */
     public function getETag()
     {
         return $this->etag;
+    }
+
+    /**
+     * Sets the object's ETag
+     *
+     * The ETag will be automatically generated as an MD5 checksum of the
+     * file's contents when an object is uploaded, but in some cases it's
+     * useful to override it.
+     *
+     * @api
+     * @param string MD5 checksum hexadecimal string
+     */
+    public function setETag($etag)
+    {
+        $this->etag = $etag;
     }
 
     /********** CDN METHODS **********/
@@ -523,29 +577,58 @@ class DataObject extends ObjStoreBase {
             return FALSE;
         }
 
-        if(!isset($this->extra_headers))
-            $this->extra_headers = array();
-
-        // set headers as metadata?
-        foreach($response->Headers() as $header => $value) {
-            if (0===strpos($header, 'HTTP/') or 0===strpos($header, "\n"))
-                continue;
-
-            switch($header) {
-            case 'Content-Type':
-                $this->content_type = $value;
-                break;
-            case 'Content-Length':
-                $this->content_length = $value;
-                break;
-            default:
-                $this->extra_headers[$header] = $value;
-                break;
-            }
-        }
+        // parse the response headers and populate this object
+        $this->GetHeaders($response);
 
         // parse the metadata
         $this->GetMetadata($response);
+	}
+
+	/**
+	 * Uses a response's headers to populate any empty properties in this object
+	 *
+	 * @param \OpenCloud\HttpResponse $response response from an object request (from Create or Fetch)
+	 */
+	private function GetHeaders(\OpenCloud\HttpResponse $response)
+	{
+		// set values from response
+		if(!isset($this->extra_headers))
+			$this->extra_headers = array();
+
+		$responseHeaders = $response->Headers(); // Temp var not necessary in PHP 5.4+
+		$toSet = array();
+
+		foreach($responseHeaders as $key => $value) {
+			if (isset($this->header_translate[$key])) {
+				$toSet[$this->header_translate[$key]] = $value;
+			}
+			else if (0===strpos($key, 'HTTP/') or FALSE!==strpos($key, "\n"))
+				continue;
+			else {
+				switch($key) {
+				case 'Content-Type':
+					$toSet['content_type'] = $value;
+					break;
+				case 'Content-Length':
+					$toSet['content_length'] = $value;
+					break;
+				case 'Etag':
+					$toSet['etag'] = $value;
+					$toSet['hash'] = $value;
+					break;
+				default:
+					if(!isset($this->extra_headers[$key]))
+						$this->extra_headers[$key] = $value;
+					break;
+				}
+			}
+		}
+		if(!empty($toSet)) {
+			foreach ($toSet as $key => $value) {
+				if(!isset($this->{$key}))
+					$this->{$key} = $value;
+			}
+		}
 	}
 
 	/**
