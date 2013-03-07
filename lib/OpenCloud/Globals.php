@@ -50,8 +50,6 @@ namespace OpenCloud;
  *      available.
  */
 
-if (!defined('RAXSDK_TIMEZONE'))
-    define('RAXSDK_TIMEZONE', 'America/Chicago');
 if (!defined('RAXSDK_STRICT_PROPERTY_CHECKS'))
     define('RAXSDK_STRICT_PROPERTY_CHECKS', FALSE);
 if (!defined('RAXSDK_COMPUTE_NAME'))
