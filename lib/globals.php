@@ -48,8 +48,6 @@
  *      available.
  */
 
-if (!defined('RAXSDK_TIMEZONE'))
-    define('RAXSDK_TIMEZONE', 'America/Chicago');
 if (!defined('RAXSDK_STRICT_PROPERTY_CHECKS'))
     define('RAXSDK_STRICT_PROPERTY_CHECKS', FALSE);
 if (!defined('RAXSDK_COMPUTE_NAME'))
@@ -123,9 +121,6 @@ if (!defined('RAXSDK_SSL_VERIFYPEER'))
  * edit and uncomment this to set the default location of cacert.pem file
  */
 //define('RAXSDK_CACERTPEM', __DIR__ . DIRECTORY_SEPARATOR . 'cacert.pem');
-
-// set the default timezone
-date_default_timezone_set(RAXSDK_TIMEZONE);
 
 /* these should not be overridden */
 define('RAXSDK_VERSION', '1.4');
