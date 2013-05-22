@@ -658,7 +658,7 @@ class DataObject extends ObjectStore
      *
      * @param \OpenCloud\HttpResponse $response response from an object request (from Create or Fetch)
      */
-    private function GetHeaders(\OpenCloud\HttpResponse $response)
+    private function GetHeaders($response)
     {
         // set values from response
         if(!isset($this->extra_headers))
