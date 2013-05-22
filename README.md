@@ -3,12 +3,19 @@
 PHP SDK for OpenStack/Rackspace APIs
 
 > **IMPORTANT NOTE**: With release 1.3, all of the file extensions have been
-  changed from `.inc` to `.php`. This means that any existing code must be 
+  changed from `.inc` to `.php`. This means that any existing code must be
   edited to use this new version.
+
+> **ANOTHER IMPORTANT NOTE**: the working branch (soon to be release 1.5) has
+  been substantially reorganized around namespaces and *all* of the file
+  locations/names have been changed.
 
 See the
 [COPYING](https://github.com/rackspace/php-opencloud/blob/master/COPYING)
 file for license and copyright information.
+
+Now running continuous integration at
+[travis-ci.org](https://travis-ci.org/rackspace/php-opencloud)
 
 For other SDKs, see http://developer.rackspace.com
 
@@ -30,10 +37,10 @@ SDK (and not developers working *with* the SDK).
 Downloading
 -----------
 
-Visit https://github.com/rackspace/php-opencloud/tags to see tagged releases 
+Visit https://github.com/rackspace/php-opencloud/tags to see tagged releases
 that you can download.
 
-You can download the master branch using the 
+You can download the master branch using the
 GitHub "ZIP" button, above. However, this has the latest code and may not
 be as stable as the tagged branches.
 
@@ -46,6 +53,8 @@ language bindings, please file an issue via Github.
 For general feedback and support requests, send an email to:
 
 sdk-support@rackspace.com
+
+You can also find assistance via IRC on #rackspace at freenode.net.
 
 Getting Started with OpenStack/Rackspace
 ----------------------------------------
@@ -61,34 +70,31 @@ We are not able to test and validate every possible combination of PHP
 versions and supporting libraries, but here's our recommended minimum
 version list:
 
-* PHP 5.3
+* PHP 5.3 (note: Travis validates against 5.4 and 5.5 as well)
 * CURL extensions to PHP
 
 ### Installation
 
-GitHub has deprecated its `/downloads` directory. Click on the `ZIP` button
-on this page to download the entire repository as a .ZIP file.
+In the .zip or .tar file in which you received the library, everything under
+the `lib/` directory should be installed in a location that is accessible. If you're not using a dependency manager like Composer, you will have to register the OpenCloud namespace for your app to use:
 
-Move the files in the `lib/` directory to a location in your PHP's
-`include_path` or, conversely, set the `include_path` to point to the
-location of the `lib/` files. From within a PHP program, for example,
-you can use:
+    // Define the path to the library
+    $libraryPath = '/path/to/php-opencloud';
 
-    ini_set('include_path', './lib:'.ini_get('include_path'));
+    // Include the autoloader
+    require_once $libraryPath . '/Autoload.php';
 
-This prepends the local `./lib` directory to the existing `include_path`
-value.
+    // Register the root OpenCloud namespace
+    $classLoader = new SplClassLoader('OpenCloud', $libraryPath . '/lib');
+    $classLoader->register();
 
-If you prefer, you can modify the `include_path` setting in your `php.ini`
-file (usually found in `/etc/php.ini` or `/usr/local/etc/php.ini`).
+Once the OpenCloud namespace is registered, you will be able to access all functionality by referencing the class's namespace (in full PSR-0 compliance). For more information about namespaces, check out [PHP's documentation](http://php.net/manual/en/language.namespaces.php).
 
-If `php.ini` has this line:
-
-    include_path = "/usr/lib/php:/usr/lib/pear"
-
-then add the `lib/` directory to it:
-
-    include_path = "/usr/lib/php:/usr/lib/pear:/path/to/php-opencloud/lib"
+Contributing
+------------
+If you'd like to contribute to **php-opencloud**, see the
+[HACKING.md](https://github.com/rackspace/php-opencloud/blob/master/HACKING.md)
+file in the root directory.
 
 Further Reading
 ---------------
@@ -98,8 +104,8 @@ contains a Quick Reference
 guide to the
 **php-opencloud** library.
 
-The source for the "Getting Started with **php-opencloud**" document (the
-user's guide) starts in
+The source for the "Getting Started with
+**php-opencloud**" document (the user guide) starts in
 [docs/userguide/index.md](https://github.com/rackspace/php-opencloud/blob/master/docs/userguide/index.md).
 
 There is a complete (auto-generated) API reference manual in the

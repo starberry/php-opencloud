@@ -3,8 +3,20 @@ RELEASE NOTES
 
 ### Current branch: master
 
-### Next release:
+### 05/10/2013 Version 1.5.6
+* Support for DNS\Domain::CloneDomain() feature
+
+### 05/07/2013 Version 1.5.5
+* PSR-2 implementation (code formatting)
+* issue #95 - attempt to fix default timezone to satisfy folks
+
+### 04/30/2013 Version 1.5.4
 * Issue #38 - added support for Cloud Files TEMP_URL feature
+* Revised structure around namespaces
+* new entrypoint: php-opencloud.php (rackspace.php and openstack.php are still
+  available for backwards compatibility)
+* Fixed issue #94
+* Added scripts/ver++.sh to increment version patch number
 
 ### 02/21/2013 Version 1.4
 * Added __DIR__ to all internal `require()` calls. [Issue #40]

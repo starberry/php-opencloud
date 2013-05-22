@@ -2,13 +2,16 @@
 /**
  * (c)2012 Rackspace Hosting. See COPYING for license details
  *
- * This sample creates an isolated network called SAMPLENET. It then
- * creates two servers attached to that network. Once the servers are
- * created, it pauses to wait for you to verify the connectivity. When
- * it continues, it deletes the servers and SAMPLENET.
+ * This sample script deletes all cloud servers, snapshots,
+ * cloud networks, cloud files containers, load balancers, DNS
+ * entries, and database instances associated with your account.
+ * Be careful using this script unless you want to purge all items
+ * created under your account.
  */
 $start = time();
-ini_set('include_path', './lib:'.ini_get('include_path'));
+
+require_once "php-opencloud.php";
+
 if (strpos($_ENV['NOVA_URL'], 'staging.identity.api.rackspacecloud')) {
 	define('RAXSDK_SSL_VERIFYHOST', 0);
 	define('RAXSDK_SSL_VERIFYPEER', 0);
@@ -51,7 +54,7 @@ printf("Region [%s]\n", MYREGION);
 printf("Endpoint [%s]\n", $_ENV['NOVA_URL']);
 
 step('Authenticate');
-$rackspace = new OpenCloud\Rackspace(AUTHURL,
+$rackspace = new \OpenCloud\Rackspace(AUTHURL,
 	array( 'username' => USERNAME,
 		   'apiKey' => APIKEY ));
 
@@ -75,7 +78,7 @@ while($network = $list->Next()) {
 	info('Deleting: %s %s', $network->id, $network->label);
 	try {
 		$network->Delete();
-	} catch (OpenCloud\DeleteError $e) {
+	} catch (OpenCloud\Base\Exceptions\DeleteError $e) {
 		info('---Cannot delete');
 	}
 }
@@ -101,15 +104,6 @@ while($snap = $list->Next()) {
             $snap->id, $snap->Name(), $snap->Status());
 }
 
-step('Deleting SAMPLENET and SMOKETEST Networks');
-$list = $cloudservers->NetworkList();
-while($network = $list->Next()) {
-    if ($network->label=='SAMPLENET' || $network->label=='SMOKETEST') {
-        info('Deleting network [%s] %s', $network->id, $network->label);
-        $network->Delete();
-    }
-}
-
 step('Deleting objects');
 $list = $files->ContainerList();
 while($container = $list->Next()) {
@@ -129,7 +123,11 @@ step('Deleting load balancers');
 $list = $lbservice->LoadBalancerList();
 while($lb = $list->Next()) {
 	info('Deleting [%s] %s', $lb->id, $lb->Name());
-	$lb->Delete();
+	try {
+		$lb->Delete();
+	} catch (OpenCloud\Base\Exceptions\DeleteError $e) {
+		info('---Cannot delete');
+	}
 }
 
 step('Deleting unused volumes');

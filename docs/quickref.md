@@ -23,39 +23,40 @@ two different connection services provided: OpenStack and Rackspace
 (hopefully, there will be more in the future, and developers are
 encouraged to contribute theirs).
 
-To use an OpenStack service, use
+To use the **php-opencloud** library, use this `require()` statement in your
+script:
 
-    require('openstack.php');
+	require '/path/to/lib/php-opencloud.php';
 
-To use the Rackspace public cloud, use:
-
-    require('rackspace.php');
-
-Once you've included the desired connection class, you can proceed
+Once you've referenced the desired connection class, you can proceed
 to establish the connection. For OpenStack clouds, provide the
 username and password:
 
-    require('openstack.php');
-	$conn = new OpenCloud\OpenStack(
-		'https://example.com/v2/identity',
-		array(
-			'username' => 'your username',
-			'password' => 'your Keystone password',
-			'tenantName' => 'your tenant (project) name'
-		));
+    $conn = new \OpenCloud\OpenStack(
+    	'https://example.com/v2/identity',
+    	array(
+    		'username' => 'your username',
+    		'password' => 'your Keystone password',
+    		'tenantName' => 'your tenant (project) name'
+    	));
 
 (Note that the `tenantName` value may not be required for all installations.)
 
 If you are using Rackspace's authentication, you need to pass your
 API key and tenant ID instead:
 
-    require('rackspace.php');
-	$conn = new OpenCloud\Rackspace(
+	$conn = new \OpenCloud\Rackspace(
 		'https://example.com/v2/identity',
 		array(
 			'username' => 'your username',
-			'apiKey' => 'your API key'
+			'apiKey' => 'your API key',
+			'tenantName' => 'your tenant name'
 		));
+
+Note that the `Rackspace` class will also permit `username`/`password`
+authentication as well, but the `apiKey` method is preferred.
+The `tenantName` argument is optional; if not provided, your access
+may be restricted because of ACLs on the account.
 
 The connection object can be re-used at will (so long as you're
 communicating with the same endpoint) and must be passed to other
