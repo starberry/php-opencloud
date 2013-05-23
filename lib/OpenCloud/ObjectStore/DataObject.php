@@ -26,13 +26,14 @@ use OpenCloud\AbstractClass\ObjectStore;
  */
 class DataObject extends ObjectStore
 {
-    public $name;            // the object name
-    public $hash;            // hash value of object
-    public $bytes;           // size of object in bytes
-    public $last_modified;   // date of last modification
-    public $content_type;    // Content-Type:
-    public $content_length;  // Content-Length:
-    public $extra_headers;   // Other headers, eg. Access-Control-Allow-Origin:
+    public $name;               // the object name
+    public $hash;               // hash value of object
+    public $bytes;              // size of object in bytes
+    public $last_modified;      // date of last modification
+    public $content_type;       // Content-Type:
+    public $content_length;     // Content-Length:
+    public $extra_headers;      // Other headers, eg. Access-Control-Allow-Origin:
+    public $send_etag = TRUE;   // Whether or not to calculate and send an etag on Create.
 
     private $data;           // the actual data
     private $etag;           // the ETag
@@ -142,10 +143,19 @@ class DataObject extends ObjectStore
                 $this->_guess_content_type($filename);
             }
 
+            if ($this->send_etag) {
+                $this->etag = md5_file($filename);
+            }
+
             $this->debug('Uploading %u bytes from %s', $filesize, $filename);
         } else {
             // compute the length
             $this->content_length = strlen($this->data);
+
+            if ($this->send_etag) {
+                $this->etag = md5($this->data);
+            }
+
         }
 
         // flag missing Content-Type
@@ -605,7 +615,8 @@ class DataObject extends ObjectStore
                     break;
                 case 'type':
                     throw new Exceptions\UnknownParameterError(
-                        Lang::translate('Parameter [type] is deprecated; use "content_type"')
+                        Lang::translate(
+                        'Parameter [type] is deprecated; use "content_type"')
                     );
                 case 'content_type':
                     $this->content_type = $value;
@@ -613,11 +624,15 @@ class DataObject extends ObjectStore
                 case 'extra_headers':
                     $this->extra_headers = $value;
                     break;
+                case 'send_etag':
+                    $this->send_etag = $value;
+                    break;
                 default:
                     throw new Exceptions\UnknownParameterError(sprintf(
-                        Lang::translate('Unrecognized parameter [%s] for object [%s]'),
-                        $item,
-                        $this->Url()
+                        Lang::translate(
+                        	'Unrecognized parameter [%s] for object [%s]'),
+							$item,
+							$this->Url()
                     ));
             }
         }

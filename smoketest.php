@@ -25,7 +25,7 @@ define('VOLUMENAME', 'SmokeTestVolume');
 define('VOLUMESIZE', 103);
 define('LBNAME', 'SmokeTestLoadBalancer');
 define('CACHEFILE', '/tmp/smoketest.credentials');
-define('TESTDOMAIN', 'fipplefippleraxdrg.info');
+define('TESTDOMAIN', 'domain-'.time().'.info');
 define('RAXSDK_STRICT_PROPERTY_CHECKS', false);
 
 require_once 'lib/php-opencloud.php';
@@ -38,8 +38,6 @@ require_once 'lib/php-opencloud.php';
 define('AUTHURL', $_ENV['NOVA_URL']);
 define('USERNAME', $_ENV['OS_USERNAME']);
 define('APIKEY', $_ENV['NOVA_API_KEY']);
-
-$debug = new \OpenCloud\Base\Debug;
 
 /**
  * numbers each step
@@ -60,7 +58,7 @@ if ($argc > 1) {
 		case '-D':
 		case '--debug':
 			printf("Debug ON\n");
-			$debug->setDebug(TRUE);
+			define(RAXSDK_DEBUG, true);
 			break;
 		case '-H':
 		case '--help':
@@ -246,7 +244,6 @@ $met->Create();
 step('Add a public IPv6 address');
 //setDebug(TRUE);
 $lb->AddVirtualIp('PUBLIC', 6);
-$debug->setDebug(FALSE);
 
 // allowed domains
 $adlist = $lbservice->AllowedDomainList();
