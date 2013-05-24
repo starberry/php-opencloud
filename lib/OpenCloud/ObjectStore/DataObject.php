@@ -26,7 +26,6 @@ use OpenCloud\AbstractClass\ObjectStore;
  */
 class DataObject extends ObjectStore
 {
-
     public $name;               // the object name
     public $hash;               // hash value of object
     public $bytes;              // size of object in bytes
@@ -507,7 +506,7 @@ class DataObject extends ObjectStore
      * Accessor method for reading Object's private ETag attribute.
      *
      * @api
-     * @return string MD5 checksum hexidecimal string
+     * @return string MD5 checksum hexadecimal string
      */
     public function getETag()
     {

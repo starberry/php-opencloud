@@ -27,9 +27,8 @@ use OpenCloud\Base\Lang;
  * @author Glen Campbell <glen.campbell@rackspace.com>
  */
 
-class Service extends ObjectStoreBase 
+class Service extends ObjectStoreBase
 {
-    
     /**
      * This holds the associated CDN object (for Rackspace public cloud)
      * or is NULL otherwise. The existence of an object here is
