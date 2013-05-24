@@ -44,6 +44,8 @@ class Service extends ObjectStoreBase
      * @param string $serviceName the name of the service to use
      * @param string $serviceRegion the name of the service region to use
      * @param string $urltype the type of URL to use (usually "publicURL")
+     * @param string $cdnUrltype the type of URL to use for CDN operations
+     *      (optional, NULL defaults to $urltype)
      */
     public function __construct(
         OpenStack $connection,
@@ -74,7 +76,7 @@ class Service extends ObjectStoreBase
                 $connection,
                 $serviceName . 'CDN', // will work for Rackspace
                 $serviceRegion,
-                $urltype
+                $cdnUrltype
             );
         } catch (Exceptions\EndpointError $e) {
             /**
