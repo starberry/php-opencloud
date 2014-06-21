@@ -1,8 +1,8 @@
 {
-    "name": "rackspace/php-opencloud",
+    "name": "starberry/php-opencloud",
     "description": "Rackspace open cloud php library",
     "keywords": ["opencloud", "cloudfiles"],
-    "version": "1.4.0",
+    "version": "0.0.1",
     "type": "library",
     "license": "MIT",
     "autoload": {
